@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SaleFactory {
-    public Sale createSale(String line){
+    public Sale createSale(String line) {
         List<SaleItems> saleItemsList = new ArrayList<>();
         if (line.contains("[")) {
             line = line.replace("[", "").replaceAll("]", "");
