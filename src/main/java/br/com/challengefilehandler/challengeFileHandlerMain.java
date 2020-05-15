@@ -10,7 +10,7 @@ public class challengeFileHandlerMain {
         FileHandler fh = new FileHandler();
         File file;
 
-        String pathIn = System.getProperty("user.home")+"/data/in";
+        String pathIn = System.getProperty("user.home").concat("/data/in");
         file = new File(pathIn);
         if (!file.exists()) {
             file.mkdirs();
@@ -33,7 +33,7 @@ public class challengeFileHandlerMain {
 
         fh.reader(pathIn);
 
-        String pathOut = System.getProperty("user.home")+"/data/out";
+        String pathOut = System.getProperty("user.home").concat("/data/out");
         file = new File(pathOut);
         if (!file.exists()) {
             file.mkdirs();
