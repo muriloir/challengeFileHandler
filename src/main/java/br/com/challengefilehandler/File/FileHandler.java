@@ -44,17 +44,14 @@ public class FileHandler {
         buffRead.close();
     }
 
-    public String expensiveSaleId(List<Sale> saleList){
+    public String expensiveSaleId(List<Sale> saleList) {
         double expensiveSale = 0.0;
         double sumOfPurchase = 0.0;
         double cheapSale = expensiveSale;
-        String saleId="";
+        String saleId = "";
 
         for (Sale sale : saleList) {
-            for (SaleItems saleItems : sale.getSalesItems()) {
-                double mult = (saleItems.getPrice() * saleItems.getQuantity());
-                sumOfPurchase += mult;
-            }
+            sumOfPurchase = sumOfPurchase(sale);
             if (sumOfPurchase > expensiveSale) {
                 expensiveSale = sumOfPurchase;
                 cheapSale = expensiveSale;
@@ -62,14 +59,23 @@ public class FileHandler {
                 sumOfPurchase = 0.0;
             }
         }
-        worstSalesman(saleList, cheapSale,expensiveSale, sumOfPurchase);
+        worstSalesman(saleList, cheapSale, expensiveSale, sumOfPurchase);
         return saleId;
     }
 
-    public void worstSalesman(List<Sale> salelist, double cheapSale, double expensiveSale, double sumOfPurchase){
+    public double sumOfPurchase(Sale sale) {
+        double sumOfPurchase = 0.0;
+        for (SaleItems saleItems : sale.getSalesItems()) {
+            double mult = (saleItems.getPrice() * saleItems.getQuantity());
+            sumOfPurchase += mult;
+        }
+        return sumOfPurchase;
+    }
+
+    public void worstSalesman(List<Sale> salelist, double cheapSale, double expensiveSale, double sumOfPurchase) {
         for (Sale sale : saleList) {
             cheapSale = expensiveSale;
-            sumOfPurchase=0.0;
+            sumOfPurchase = 0.0;
             for (SaleItems saleItems : sale.getSalesItems()) {
                 double mult = (saleItems.getPrice() * saleItems.getQuantity());
                 sumOfPurchase += mult;
