@@ -1,4 +1,4 @@
-package br.com.challengefilehandler.File;
+package br.com.challengefilehandler.Service;
 import br.com.challengefilehandler.Entity.Client;
 import br.com.challengefilehandler.Entity.Sale;
 import br.com.challengefilehandler.Entity.SaleItems;
@@ -7,16 +7,20 @@ import br.com.challengefilehandler.Factory.ClientFactory;
 import br.com.challengefilehandler.Factory.SaleFactory;
 import br.com.challengefilehandler.Factory.SalesmanFactory;
 import lombok.AccessLevel;
+import lombok.Data;
 import lombok.experimental.FieldDefaults;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-
+@Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FileHandler {
     List<Salesman> salesmanList = new ArrayList<>();
     List<Client> clientList = new ArrayList<>();
     List<Sale> saleList = new ArrayList<>();
+    double expensiveSale = 0.0;
+    double sumOfPurchase = 0.0;
+    double cheapSale = 0.0;
     String salesmanName = "";
     String line = "";
 
@@ -24,18 +28,7 @@ public class FileHandler {
         BufferedReader buffRead = new BufferedReader(new FileReader(path));
         while (true) {
             if (line != null) {
-                if (line.contains("001")) {
-                    SalesmanFactory salesmanFactory = new SalesmanFactory();
-                    salesmanList.add(salesmanFactory.createSalesman(line));
-
-                } else if (line.contains("002")) {
-                    ClientFactory clientFactory = new ClientFactory();
-                    clientList.add(clientFactory.createClient(line));
-
-                } else if (line.contains("003")) {
-                    SaleFactory saleFactory = new SaleFactory();
-                    saleList.add(saleFactory.createSale(line));
-                }
+                createFactories(line);
             } else {
                 break;
             }
@@ -44,12 +37,26 @@ public class FileHandler {
         buffRead.close();
     }
 
-    public String expensiveSaleId(List<Sale> saleList) {
-        double expensiveSale = 0.0;
-        double sumOfPurchase = 0.0;
-        double cheapSale = expensiveSale;
-        String saleId = "";
+    public void createFactories(String line) {
+        if (line.contains("001")) {
+            SalesmanFactory salesmanFactory = new SalesmanFactory();
+            salesmanList.add(salesmanFactory.createSalesman(line));
 
+        } else if (line.contains("002")) {
+            ClientFactory clientFactory = new ClientFactory();
+            clientList.add(clientFactory.createClient(line));
+
+        } else if (line.contains("003")) {
+            SaleFactory saleFactory = new SaleFactory();
+            saleList.add(saleFactory.createSale(line));
+        }
+    }
+
+    public String expensiveSaleId(List<Sale> saleList) {
+        expensiveSale = 0.0;
+        sumOfPurchase = 0.0;
+        cheapSale = expensiveSale;
+        String saleId = "";
         for (Sale sale : saleList) {
             sumOfPurchase = sumOfPurchase(sale);
             if (sumOfPurchase > expensiveSale) {
@@ -59,33 +66,29 @@ public class FileHandler {
                 sumOfPurchase = 0.0;
             }
         }
-        worstSalesman(saleList, cheapSale, expensiveSale, sumOfPurchase);
         return saleId;
     }
 
     public double sumOfPurchase(Sale sale) {
         double sumOfPurchase = 0.0;
         for (SaleItems saleItems : sale.getSalesItems()) {
-            double mult = (saleItems.getPrice() * saleItems.getQuantity());
-            sumOfPurchase += mult;
+            sumOfPurchase += (saleItems.getPrice() * saleItems.getQuantity());
         }
         return sumOfPurchase;
     }
 
-    public void worstSalesman(List<Sale> salelist, double cheapSale, double expensiveSale, double sumOfPurchase) {
+    public String worstSalesman(List<Sale> saleList) {
         for (Sale sale : saleList) {
             cheapSale = expensiveSale;
             sumOfPurchase = 0.0;
-            for (SaleItems saleItems : sale.getSalesItems()) {
-                double mult = (saleItems.getPrice() * saleItems.getQuantity());
-                sumOfPurchase += mult;
-            }
+            sumOfPurchase = sumOfPurchase(sale);
 
             if (sumOfPurchase < cheapSale) {
                 cheapSale = sumOfPurchase;
                 salesmanName = sale.getSalesmanName();
             }
         }
+        return salesmanName;
     }
 
     public void writer(String path) throws IOException {
@@ -94,7 +97,18 @@ public class FileHandler {
                 clientList.size(),
                 salesmanList.size(),
                 expensiveSaleId(saleList),
-                salesmanName) + "\n");
+                worstSalesman(saleList)) + "\n");
+        buffWrite.close();
+    }
+
+    public void createDefaultFile(String pathIn) throws IOException {
+        BufferedWriter buffWrite = new BufferedWriter(new FileWriter(pathIn));
+        buffWrite.append("001ç1234567891234çPedroç50000\n" +
+                "001ç3245678865434çPauloç40000.99\n" +
+                "002ç2345675434544345çJose da SilvaçRural\n" +
+                "002ç2345675433444345çEduardo PereiraçRural\n" +
+                "003ç10ç[1-10-100,2-30-2.50,3-40-3.10]çPedro\n" +
+                "003ç08ç[1-34-10,2-33-1.50,3-40-0.10]çPaulo");
         buffWrite.close();
     }
 }
